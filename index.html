@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welfare Mess</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f7f9fc;
+      margin: 0;
+      padding-top: 60px;
+    }
+
+    .top-header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: #0d6efd;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 500;
+      z-index: 1000;
+    }
+
+    .nav-tabs {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: white;
+      border-top: 1px solid #ddd;
+      justify-content: space-around;
+      z-index: 999;
+    }
+
+    .nav-tabs .nav-link {
+      text-align: center;
+      font-size: 0.8rem;
+      padding: 0.5rem 0;
+    }
+
+    .nav-tabs .nav-link i {
+      display: block;
+      font-size: 1.5rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .tab-content {
+      padding: 1rem;
+      padding-bottom: 100px; /* Prevent overlap with bottom navbar */
+    }
+
+    #setEmail .email-wrapper {
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    #setEmail input {
+      max-width: 300px;
+    }
+
+    .about-section {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #555;
+      text-align: center;
+    }
+
+    .card {
+      margin-bottom: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.01);
+    }
+
+    @media (max-width: 576px) {
+      .card p {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div class="top-header">Welfare Mess</div>
+
+<div class="container-fluid tab-content" id="tabContent">
+  <div class="tab-pane fade show active" id="setEmail" role="tabpanel">
+    <div class="email-wrapper">
+      <h4 class="mb-3">Enter your Email</h4>
+      <input type="email" id="emailInput" class="form-control" placeholder="Enter your email" />
+      <button class="btn btn-primary mt-3" onclick="saveEmail()">Submit</button>
+    </div>
+    <div class="about-section">
+      <hr />
+      <p><strong>This app is created by Rahul Gupta.</strong></p>
+      <p>Email: rkgchpc@gmail.com</p>
+      <p>Phone: +91 89053 37897</p>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="instalments" role="tabpanel">
+    <div id="instalmentsContent"></div>
+  </div>
+  <div class="tab-pane fade" id="diets" role="tabpanel">
+    <div id="dietsContent"></div>
+  </div>
+  <div class="tab-pane fade" id="announcements" role="tabpanel"></div>
+  <div class="tab-pane fade" id="dietMenu" role="tabpanel"></div>
+  <div class="tab-pane fade" id="personnel" role="tabpanel"></div>
+</div>
+
+<ul class="nav nav-tabs nav-fill" id="tabs">
+  <li class="nav-item">
+    <a class="nav-link active" data-bs-toggle="tab" href="#setEmail"><i class="fas fa-envelope"></i>Email</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-bs-toggle="tab" href="#instalments"><i class="fas fa-money-bill-wave"></i>Instalments</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-bs-toggle="tab" href="#diets"><i class="fas fa-drumstick-bite"></i>Diets</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-bs-toggle="tab" href="#announcements"><i class="fas fa-bullhorn"></i>Announcements</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-bs-toggle="tab" href="#dietMenu"><i class="fas fa-utensils"></i>Diet Menu</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-bs-toggle="tab" href="#personnel"><i class="fas fa-user-friends"></i>Team</a>
+  </li>
+</ul>
+
+<script>
+  const sheetId = '1KCgj6xJNj7gpJEwKH8fj3I_SldZsg1mKHiOA_8VESC0';
+  const apiKey = 'AIzaSyCzg84aqc_4Phwc142-HqDGYMv9Dy2Ctqo';
+  const sheetNames = ['Instalments', 'Diets', 'Announcement', 'Diet Menu History', 'Key Personnel'];
+
+  let userEmail = localStorage.getItem('welfareEmail') || '';
+
+  function saveEmail() {
+    userEmail = document.getElementById('emailInput').value;
+    if (!userEmail) return alert("Please enter a valid email.");
+    localStorage.setItem('welfareEmail', userEmail);
+    alert("Email saved!");
+    location.reload();
+  }
+
+  async function fetchSheet(sheet, filterByEmail = false) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheet}?alt=json&key=${apiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data.values) return [];
+    const headers = data.values[0];
+    const rows = data.values.slice(1);
+    const filtered = filterByEmail ? rows.filter(row => row[0]?.toLowerCase() === userEmail.toLowerCase()) : rows;
+
+    return filtered.map(row =>
+      Object.fromEntries(headers.map((key, i) => [key, row[i] || '']))
+    );
+  }
+
+  function renderCard(item) {
+    return `<div class="card p-3">
+      ${Object.entries(item).map(([key, val]) => `<p><strong>${key}</strong><br>${val}</p>`).join('')}
+    </div>`;
+  }
+
+  function renderTab(tabId, data) {
+    document.getElementById(tabId).innerHTML = data.length ? data.map(renderCard).join('') : '<p>No data found.</p>';
+  }
+
+  async function initTabs() {
+    if (userEmail) {
+      renderTab('instalmentsContent', await fetchSheet(sheetNames[0], true));
+      renderTab('dietsContent', await fetchSheet(sheetNames[1], true));
+    }
+    renderTab('announcements', await fetchSheet(sheetNames[2]));
+    renderTab('dietMenu', await fetchSheet(sheetNames[3]));
+    renderTab('personnel', await fetchSheet(sheetNames[4]));
+  }
+
+  initTabs();
+</script>
+
+</body>
+</html>
